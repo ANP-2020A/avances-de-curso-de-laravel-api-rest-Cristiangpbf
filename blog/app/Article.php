@@ -3,10 +3,19 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Article extends Model
 {
     protected $fillable = ['title', 'body'];
+
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($article) {
+            $article->user_id = Auth::id();
+        });
+    }
 
     public function comments()
     {
@@ -17,5 +26,7 @@ class Article extends Model
     {
         return $this->belongsTo('App\User');
     }
+
+
 
 }
