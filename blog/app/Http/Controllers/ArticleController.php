@@ -18,8 +18,17 @@ class ArticleController extends Controller
     }
     public function store(Request $request)
     {
-        $article = Article::create($request->all());
-        return response()->json($article, 201);
+        $messages = [
+            'required' => 'El campo :attribute es obligatorio.',
+            'body.required' => 'El body no es valdo',
+        ];
+        $validatedData = $request->validate([
+            'title' => 'required|string|unique:articles|max:255',
+            'body' => 'required',
+        ],$messages);
+
+        $article = Article::create($validatedData);
+        return response()->json(new ArticleResource($article), 201);
     }
     public function update(Request $request, Article $article)
     {
