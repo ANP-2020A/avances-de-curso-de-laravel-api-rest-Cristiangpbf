@@ -5,6 +5,7 @@ use App\Article;
 use Illuminate\Http\Request;
 use App\Http\Resources\Article as ArticleResource;
 use App\Http\Resources\ArticleCollection;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
@@ -27,10 +28,16 @@ class ArticleController extends Controller
         $request->validate([
             'title' => 'required|string|unique:articles|max:255',
             'body' => 'required',
-            'category_id'=>'required|exists:categories,id'
+            'category_id'=>'required|exists:categories,id',
+            'image' => 'required|image|dimensions:min_width=200,min_height=200',
         ], self::$messages);
 
-        $article = Article::create($request->all());
+/*        $article = Article::create($request->all());*/
+
+        $article = new Article($request->all());
+        $path = $request->image->store('public/articles');
+        $article->image = $path;
+        $article->save();
         return response()->json(new ArticleResource($article), 201);
     }
     public function update(Request $request, Article $article)
@@ -48,5 +55,10 @@ class ArticleController extends Controller
     {
         $article->delete();
         return response()->json(null, 204);
+    }
+
+    public function image(Article $article)
+    {
+        return response()->download(public_path(Storage::url($article->image)), $article->title);
     }
 }
