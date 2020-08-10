@@ -7,12 +7,14 @@ use Illuminate\Support\Facades\Auth;
 
 class User extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
+    protected $token;
+
+    public function __construct($resource, $token = null)
+    {
+        parent::__construct($resource);
+        $this->token = $token;
+    }
+
     public function toArray($request)
     {
         return [
