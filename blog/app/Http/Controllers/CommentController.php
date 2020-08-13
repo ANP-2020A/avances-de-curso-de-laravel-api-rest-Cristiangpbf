@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Comment;
 use App\Article;
 use App\Http\Resources\Comment as CommentResource;
+use App\Mail\NewComment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class CommentController extends Controller
 {
@@ -23,12 +25,15 @@ class CommentController extends Controller
         ]);
 
         $comment = $article->comments()->save(new Comment($request->all()));
-        return response()->json($comment, 201);
+        Mail::to($article->user)->send(new NewComment($comment));
+
+        return response()->json(new CommentResource($comment), 201);
     }
 
     public function show(Article $article, Comment $comment)
     {
-        return response()->json($article->comments()->where('id',$comment->id)->firstOrFail(),200);
+        $comment = $article->comments()->where('id', $comment->id)->firstOrFail();
+        return response()->json(new CommentResource($comment),200);
     }
 
     /**
